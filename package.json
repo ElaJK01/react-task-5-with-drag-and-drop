@@ -35,6 +35,8 @@
     "path": "^0.12.7",
     "ramda": "^0.28.0",
     "react": "^18.1.0",
+    "react-dnd": "^16.0.1",
+    "react-dnd-html5-backend": "^16.0.1",
     "react-dom": "^18.1.0",
     "react-router-dom": "5.2.0",
     "style-loader": "^3.3.1",

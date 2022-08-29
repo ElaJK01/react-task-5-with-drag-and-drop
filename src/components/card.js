@@ -1,6 +1,7 @@
-import React from "react";
+import React, { useRef } from "react";
 import styled from "styled-components";
 import CardButton from "./cardButton";
+import { useDrag, useDrop } from "react-dnd";
 
 const CardContainer = styled.div`
   display: flex;
@@ -11,6 +12,8 @@ const CardContainer = styled.div`
   box-sizing: border-box;
   flex-basis: 30%;
   align-items: center;
+  justify-content: center;
+
 
   @media screen and (min-width: 320px) and (max-width: 768px) {
     flex-basis: 80%;
@@ -38,8 +41,9 @@ const CardContent = styled.div`
   justify-content: center;
   display: flex;
   flex-direction: column;
-  margin-right: 5px;
-  margin-left: 5px;
+  margin-right: 10px;
+  margin-left: 10px;
+  background-color: whitesmoke;
 
   @media screen and (min-width: 320px) and (max-width: 768px) {
     flex: 3;
@@ -51,24 +55,10 @@ const CardContent = styled.div`
 `;
 
 const ImgContainer = styled.div`
+  margin: 10px;
   width: 200px;
   height: 200px;
-  > img {
-    width: 100%;
-  }
-`;
-
-const Img = styled.img`
-  width: 100%;
-
-  @media screen and (min-width: 320px) and (max-width: 768px) {
-    width: 60%;
-    flex: 1;
-  }
-  @media screen and (min-width: 1201px) {
-    width: 60%;
-    flex: 1;
-  }
+  background: ${({ color, img }) => (color && !img ? color : !img && !color ? "pink" : img)};
 `;
 
 const CardTitle = styled.h4`
@@ -86,21 +76,28 @@ const CardTitle = styled.h4`
   }
 `;
 
-const CardParagraph = styled.p`
-  font-size: 10px;
-`;
+const Card = ({ img, link, color, content, title, id }) => {
 
-const Card = ({ img, link }) => (
-  <CardContainer>
-    <ImgContainer>
-      <Img src={img} alt="alt-foto" />
-    </ImgContainer>
-    <CardContent>
-      <CardTitle>Consectetur adipiscing elit</CardTitle>
-      <CardParagraph>Dignissim diam quis enim lobortis</CardParagraph>
-      <CardButton to={link} />
-    </CardContent>
-  </CardContainer>
-);
+  console.log('id', id)
+  const [{ isDragging }, drag] = useDrag({
+    type: "card",
+    item: () => ({ id }),
+    collect: (monitor) => ({
+      isDragging: !!monitor.isDragging(),
+    }),
+  });
+
+
+  return (
+    <CardContainer ref={drag}>
+      <ImgContainer color={color} img={img} />
+      <CardContent>
+        <CardTitle>{title}</CardTitle>
+        {content}
+        <CardButton to={link} />
+      </CardContent>
+    </CardContainer>
+  );
+};
 
 export default Card;

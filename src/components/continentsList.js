@@ -1,7 +1,8 @@
-import React from "react";
+import React, { useState } from "react";
 import { map, prop } from "ramda";
 import styled from "styled-components";
-import CardButton from "./cardButton";
+import { useDrop } from "react-dnd";
+import Card from "./card";
 
 const ListRoot = styled.div`
   display: flex;
@@ -20,56 +21,61 @@ const ListRoot = styled.div`
   }
 `;
 
-const Card = styled.div`
-  display: flex;
-  flex-direction: column;
-  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
-  transition: 0.3s;
-  margin: 10px;
-  box-sizing: border-box;
-  flex-basis: 30%;
-`;
+const ContinentsList = ({ list }) => {
+  const [listOrder, setListOrder] = useState([]);
 
-const CardContent = styled.div`
-  padding: 2px;
-  align-items: center;
-  justify-content: center;
-  display: flex;
-  flex-direction: column;
-  margin-right: 5px;
-  margin-left: 5px;
-`;
+  console.log('list', list, 'listorder', listOrder)
 
-const CardTitle = styled.h4`
-  margin: 0.5em;
-  padding: 0;
-`;
+  const changeItemPlace = (id) => {
+    const itemList = list.filter((item) => id === item.code);
+    console.log("itemlist", itemList);
+    setListOrder((listOrder) => [...listOrder, itemList[0]]);
+  };
 
-const CardDiv = styled.div`
-  width: 200px;
-  height: 200px;
-  background-color: lightseagreen;
-`;
+  const [{ isOver }, drop] = useDrop(() => ({
+    accept: "card",
+    drop: (item) => changeItemPlace(item.id),
+    collect: (monitor) => ({
+      isOver: monitor.isOver(),
+    }),
+  }));
 
-const ContinentsList = ({ list }) => (
-  <ListRoot>
-    {list
-      |> map((el) => (
-        <Card key={prop("code", el)}>
-          <CardContent>
-            <CardTitle>{prop("name", el)}</CardTitle>
-            <CardDiv />
-            <p>
-              Code:
-              {prop("code", el)}
-            </p>
-            <CardButton to={`/continents/${prop("code", el)}`}>
-              Details
-            </CardButton>
-          </CardContent>
-        </Card>
+
+  return (<div><ListRoot>
+      {list
+        |> map((el) => (
+        <Card key={prop("code", el)}
+              color={"lightgreen"}
+              title={prop("name", el)}
+              content={<p>
+                Code:
+                {prop("code", el)}
+              </p>}
+              link={`/continents/${prop("code", el)}`}
+              id={prop("code", el)}
+            />
+
       ))}
-  </ListRoot>
-);
+    </ListRoot>
+      <div ref={drop} style={{display: 'flex', height: 500, border: "solid black 1px" }}>{listOrder
+        |> map((el) => (
+            <Card
+              key={prop("code", el)}
+              color={"lightgreen"}
+              title={prop("name", el)}
+              content={
+                <p>
+                  Code:
+                  {prop("code", el)}
+                </p>
+              }
+              link={`/continents/${prop("code", el)}`}
+              id={prop("code", el)}
+            />
+
+      ))}</div>
+    </div>
+  );
+};
 
 export default ContinentsList;

@@ -1,6 +1,8 @@
 import React from "react";
 import { Route, Switch } from "react-router-dom";
 import { createGlobalStyle, ThemeProvider } from "styled-components";
+import { HTML5Backend } from "react-dnd-html5-backend";
+import { DndProvider } from "react-dnd";
 import Home from "./pages/home";
 import About from "./pages/about";
 import Contact from "./pages/contact";
@@ -50,24 +52,26 @@ function App() {
   const mode = theme === "light" ? lightTheme : darkTheme;
 
   return (
-    <ThemeProvider theme={mode}>
-      <div>
-        <GlobalStyle />
-        <ThemeToggler toggleTheme={themeToggler} theme={theme} />
-        <Layout>
-          <Switch>
-            <Route exact path="/" component={Home} />
-            <Route exact path="/about" component={About} />
-            <Route exact path="/contact" component={Contact} />
-            <Route exact path="/countries" component={Countries} />
-            <Route exact path="/languages" component={Languages} />
-            <Route path="/languages/:code" component={LanguageDetails} />
-            <Route path="/countries/:code" component={CountryDetails} />
-            <Route path="/continents/:code" component={ContinentDetails} />
-          </Switch>
-        </Layout>
-      </div>
-    </ThemeProvider>
+    <DndProvider backend={HTML5Backend}>
+      <ThemeProvider theme={mode}>
+        <div>
+          <GlobalStyle />
+          <ThemeToggler toggleTheme={themeToggler} theme={theme} />
+          <Layout>
+            <Switch>
+              <Route exact path="/" component={Home} />
+              <Route exact path="/about" component={About} />
+              <Route exact path="/contact" component={Contact} />
+              <Route exact path="/countries" component={Countries} />
+              <Route exact path="/languages" component={Languages} />
+              <Route path="/languages/:code" component={LanguageDetails} />
+              <Route path="/countries/:code" component={CountryDetails} />
+              <Route path="/continents/:code" component={ContinentDetails} />
+            </Switch>
+          </Layout>
+        </div>
+      </ThemeProvider>
+    </DndProvider>
   );
 }
 
