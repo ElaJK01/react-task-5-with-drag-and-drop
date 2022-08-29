@@ -1,7 +1,7 @@
-import React, { useState } from "react";
-import { map, prop } from "ramda";
+import React, { useCallback, useState } from "react";
+import { addIndex, map } from "ramda";
 import styled from "styled-components";
-import { useDrop } from "react-dnd";
+import update from "immutability-helper";
 import Card from "./card";
 
 const ListRoot = styled.div`
@@ -22,59 +22,43 @@ const ListRoot = styled.div`
 `;
 
 const ContinentsList = ({ list }) => {
-  const [listOrder, setListOrder] = useState([]);
+  const [cards, setCards] = useState(list);
 
-  console.log('list', list, 'listorder', listOrder)
+  const moveCard = useCallback((dragIndex, hoverIndex) => {
+    setCards((prevCards) =>
+      update(prevCards, {
+        $splice: [
+          [dragIndex, 1],
+          [hoverIndex, 0, prevCards[dragIndex]],
+        ],
+      })
+    );
+  }, []);
 
-  const changeItemPlace = (id) => {
-    const itemList = list.filter((item) => id === item.code);
-    console.log("itemlist", itemList);
-    setListOrder((listOrder) => [...listOrder, itemList[0]]);
-  };
+  const renderCard = useCallback(
+    (card, index) => (
+      <Card
+        key={card.code}
+        index={index}
+        id={card.code}
+        moveCard={moveCard}
+        title={card.name}
+        content={
+          <p>
+            Code:
+            {card.code}
+          </p>
+        }
+        link={`/continents/${card.code}`}
+      />
+    ),
+    []
+  );
 
-  const [{ isOver }, drop] = useDrop(() => ({
-    accept: "card",
-    drop: (item) => changeItemPlace(item.id),
-    collect: (monitor) => ({
-      isOver: monitor.isOver(),
-    }),
-  }));
+  const mapIndexed = addIndex(map);
 
-
-  return (<div><ListRoot>
-      {list
-        |> map((el) => (
-        <Card key={prop("code", el)}
-              color={"lightgreen"}
-              title={prop("name", el)}
-              content={<p>
-                Code:
-                {prop("code", el)}
-              </p>}
-              link={`/continents/${prop("code", el)}`}
-              id={prop("code", el)}
-            />
-
-      ))}
-    </ListRoot>
-      <div ref={drop} style={{display: 'flex', height: 500, border: "solid black 1px" }}>{listOrder
-        |> map((el) => (
-            <Card
-              key={prop("code", el)}
-              color={"lightgreen"}
-              title={prop("name", el)}
-              content={
-                <p>
-                  Code:
-                  {prop("code", el)}
-                </p>
-              }
-              link={`/continents/${prop("code", el)}`}
-              id={prop("code", el)}
-            />
-
-      ))}</div>
-    </div>
+  return (
+    <ListRoot>{cards |> mapIndexed((card, i) => renderCard(card, i))}</ListRoot>
   );
 };
 
