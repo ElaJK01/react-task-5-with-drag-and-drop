@@ -14,7 +14,6 @@ const CardContainer = styled.div`
   align-items: center;
   justify-content: center;
 
-
   @media screen and (min-width: 320px) and (max-width: 768px) {
     flex-basis: 80%;
     width: 100%;

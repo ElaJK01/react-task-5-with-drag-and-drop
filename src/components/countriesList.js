@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { addIndex, map, prop } from "ramda";
+import { map, prop } from "ramda";
 import styled from "styled-components";
 import update from "immutability-helper";
 import Card from "./card";
@@ -62,8 +62,8 @@ const CountriesList = ({ list }) => {
             </ul>
           </div>
         }
-        link={`/continents/${card.code}`}
-        color={"lightseagreen"}
+        link={`/countries/${card.code}`}
+        color="lightseagreen"
       />
     ),
     [list]

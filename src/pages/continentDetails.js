@@ -1,9 +1,11 @@
-import React from "react";
+import React, { useCallback, useRef, useState } from "react";
 import { map, path, prop } from "ramda";
 import styled from "styled-components";
 import Section from "../components/section";
 import CONTINENT_QUERY from "../../API/gqlCalls/getContinent";
 import withLoadingData from "../withLoadingData";
+import { useDrag } from "react-dnd";
+import { mapIndexed } from "../helpers";
 
 const ContinentContainer = styled.div`
   display: flex;
@@ -27,28 +29,49 @@ const ContinentDetails = withLoadingData((props) => {
   const continentDetails = props |> path(["data", "continent"]);
   const countries = continentDetails |> path(["countries"]);
 
+  const itemsList = [
+    { id: 1, tag: <h3>{continentDetails.name}</h3>},
+    { id: 2, tag: <p>Code: {continentDetails.code}</p>},
+    {
+      id: 3,
+      tag: (
+        <div style={{ fontSize: "10px" }}>
+    Countries:{" "}
+    <ul style={{ listStyle: "none" }}>
+      {countries
+          |> map((country) => (
+        <li key={prop("code", country)}>{prop("name", country)}</li>
+      ))}
+    </ul>
+  </div>)}]
+
+  const [items, setItems] = useState(itemsList);
+
+  const [{ isDragging }, drag] = useDrag(() => ({
+    type: "element",
+    item: { id: "id" },
+    collect: (monitor) => ({
+      isDragging: !!monitor.isDragging(),
+    }),
+  }));
+
+
+
   const message = (
     <ContinentContainer>
-      {continentDetails && (
-        <div>
-          <h3>{continentDetails.name}</h3>
-          <p>Code: {continentDetails.code}</p>
-          <div style={{ fontSize: "10px" }}>
-            Countries:{" "}
-            <ul style={{ listStyle: "none" }}>
-              {countries
-                |> map((country) => (
-                  <li key={prop("code", country)}>{prop("name", country)}</li>
-                ))}
-            </ul>
-          </div>
-        </div>
-      )}
-    </ContinentContainer>
+      <div>
+        {items
+          |> map((item) => (
+            <div ref={drag} key={item.id}>
+              {item.tag}
+            </div>
+          ))}
+      </div>
+     </ContinentContainer>
   );
 
   return (
-    <Section title="Country Details" text={text}>
+    <Section title="Continent Details" text={text}>
       {message}
     </Section>
   );
