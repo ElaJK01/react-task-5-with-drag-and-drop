@@ -1,7 +1,9 @@
-import React from "react";
-import { map, prop } from "ramda";
+import React, { useCallback, useEffect, useState } from "react";
+import { prop } from "ramda";
 import styled from "styled-components";
+import update from "immutability-helper";
 import Card from "./card";
+import { mapIndexed } from "../helpers";
 
 const ListRoot = styled.div`
   display: flex;
@@ -14,32 +16,53 @@ const ListRoot = styled.div`
   transition: 0.3s;
   box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
   border-radius: 5px;
-
-  :hover {
-    box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2);
-  }
 `;
 
-const LanguagesList = ({ list }) => (
-  <ListRoot>
-    {list
-      |> map((el) => (
-        <Card
-          key={prop("code", el)}
-          title={prop("name", el)}
-          content={
-            <div>
-              <p>
-                Code:
-                {prop("code", el)}
-              </p>
-            </div>
-          }
-          link={`/languages/${prop("code", el)}`}
-          color="lightseagreen"
-        />
-      ))}
-  </ListRoot>
-);
+const LanguagesList = ({ list }) => {
+  const [cards, setCards] = useState(list);
+
+  useEffect(() => {
+    setCards(list);
+  }, [list]);
+
+  const moveCard = useCallback((dragIndex, hoverIndex) => {
+    setCards((prevCards) =>
+      update(prevCards, {
+        $splice: [
+          [dragIndex, 1],
+          [hoverIndex, 0, prevCards[dragIndex]],
+        ],
+      })
+    );
+  }, []);
+
+  const renderCard = useCallback(
+    (card, index) => (
+      <Card
+        key={index}
+        index={index}
+        id={prop("code", card)}
+        title={prop("name", card)}
+        content={
+          <div>
+            <p>
+              Code:
+              {prop("code", card)}
+            </p>
+          </div>
+        }
+        moveCard={moveCard}
+        link={`/languages/${prop("code", card)}`}
+        color="lightgreen"
+      />
+    ),
+    [list]
+  );
+  return (
+    <ListRoot>
+      {cards |> mapIndexed((card, index) => renderCard(card, index))}
+    </ListRoot>
+  );
+};
 
 export default LanguagesList;

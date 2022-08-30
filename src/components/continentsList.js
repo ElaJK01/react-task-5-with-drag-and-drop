@@ -1,8 +1,9 @@
 import React, { useCallback, useState } from "react";
-import { addIndex, map } from "ramda";
 import styled from "styled-components";
 import update from "immutability-helper";
+import { prop } from "ramda";
 import Card from "./card";
+import { mapIndexed } from "../helpers";
 
 const ListRoot = styled.div`
   display: flex;
@@ -38,24 +39,22 @@ const ContinentsList = ({ list }) => {
   const renderCard = useCallback(
     (card, index) => (
       <Card
-        key={card.code}
+        key={index}
         index={index}
-        id={card.code}
+        id={prop("code", card)}
         moveCard={moveCard}
-        title={card.name}
+        title={prop("name", card)}
         content={
           <p>
             Code:
-            {card.code}
+            {prop("code", card)}
           </p>
         }
-        link={`/continents/${card.code}`}
+        link={`/continents/${prop("code", card)}`}
       />
     ),
     []
   );
-
-  const mapIndexed = addIndex(map);
 
   return (
     <ListRoot>{cards |> mapIndexed((card, i) => renderCard(card, i))}</ListRoot>
