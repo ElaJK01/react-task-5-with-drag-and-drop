@@ -1,16 +1,9 @@
 import React from "react";
 import { indexOf, map, path, prop } from "ramda";
-import styled from "styled-components";
 import Section from "../components/section";
 import COUNTRY_QUERY from "../../API/gqlCalls/getCountry";
 import withLoadingData from "../withLoadingData";
-
-const CountryContainer = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 100%;
-`;
+import DetailsList from "../components/detailsList";
 
 const textDetails =
   "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod\n" +
@@ -27,46 +20,55 @@ const textDetails =
 const CountryDetails = withLoadingData((props) => {
   const countryDetails = props |> path(["data", "country"]);
 
-  const message = (
-    <CountryContainer>
-      {countryDetails && (
-        <div>
-          <h3>
-            {countryDetails.name} {countryDetails.emoji}
-          </h3>
-          <p>Code: {countryDetails.code}</p>
-          <p>Capital: {countryDetails.capital}</p>
-          <p>Currency: {countryDetails.currency}</p>
-          <p>Continent: {prop("name", countryDetails.continent)}</p>
-          <p>Phone: {countryDetails.phone}</p>
-          <div style={{ fontSize: "10px" }}>
-            Languages:{" "}
-            <ul style={{ listStyle: "none" }}>
-              {countryDetails.languages
-                |> map((lang) => (
-                  <li key={prop("code", lang)}>{prop("name", lang)}</li>
-                ))}
-            </ul>
-          </div>
-          <div style={{ fontSize: "10px" }}>
-            States:{" "}
-            <ul style={{ listStyle: "none" }}>
-              {countryDetails.states
-                |> map((state) => (
-                  <li key={indexOf(state, countryDetails.states)}>
-                    {prop("name", state)}
-                  </li>
-                ))}
-            </ul>
-          </div>
+  const itemsList = [
+    {
+      id: 1,
+      tag: (
+        <h3>
+          {countryDetails.name} {countryDetails.emoji}
+        </h3>
+      ),
+    },
+    { id: 2, tag: <p>Code: {countryDetails.code}</p> },
+    { id: 3, tag: <p>Capital: {countryDetails.capital}</p> },
+    { id: 4, tag: <p>Currency: {countryDetails.currency}</p> },
+    { id: 5, tag: <p>Continent: {prop("name", countryDetails.continent)}</p> },
+    { id: 6, tag: <p>Phone: {countryDetails.phone}</p> },
+    {
+      id: 7,
+      tag: (
+        <div style={{ fontSize: "10px" }}>
+          Languages:{" "}
+          <ul style={{ listStyle: "none" }}>
+            {countryDetails.languages
+              |> map((lang) => (
+                <li key={prop("code", lang)}>{prop("name", lang)}</li>
+              ))}
+          </ul>
         </div>
-      )}
-    </CountryContainer>
-  );
+      ),
+    },
+    {
+      id: 8,
+      tag: (
+        <div style={{ fontSize: "10px" }}>
+          States:{" "}
+          <ul style={{ listStyle: "none" }}>
+            {countryDetails.states
+              |> map((state) => (
+                <li key={indexOf(state, countryDetails.states)}>
+                  {prop("name", state)}
+                </li>
+              ))}
+          </ul>
+        </div>
+      ),
+    },
+  ];
 
   return (
     <Section title="Country Details" text={textDetails}>
-      {message}
+      <DetailsList list={itemsList} />
     </Section>
   );
 }, COUNTRY_QUERY);
