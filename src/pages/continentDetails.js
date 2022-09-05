@@ -1,17 +1,97 @@
-import React, { useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { map, path, prop } from "ramda";
 import styled from "styled-components";
+import { useDrag, useDrop } from "react-dnd";
+import update from "immutability-helper";
 import Section from "../components/section";
 import CONTINENT_QUERY from "../../API/gqlCalls/getContinent";
 import withLoadingData from "../withLoadingData";
-import { useDrag } from "react-dnd";
 import { mapIndexed } from "../helpers";
+
+const DetailElement = ({ element, index, moveElement, id }) => {
+  const ref = useRef(null);
+
+  const [, drop] = useDrop({
+    accept: "element",
+    hover(item) {
+      if (!ref.current) {
+        return;
+      }
+      const dragIndex = item.index;
+      const hoverIndex = index;
+      if (dragIndex === hoverIndex) {
+        return;
+      }
+      moveElement(dragIndex, hoverIndex);
+      item.index = hoverIndex;
+    },
+  });
+
+  const [{ isDragging }, drag] = useDrag({
+    type: "element",
+    item: { id, index },
+    collect: (monitor) => ({
+      isDragging: monitor.isDragging(),
+    }),
+  });
+
+  drag(drop(ref));
+
+  return (
+    <div
+      key={index}
+      style={{
+        border: "1px solid blue",
+        margin: 2,
+        background: isDragging ? "pink" : "transparent",
+      }}
+      ref={ref}
+    >
+      {element}
+    </div>
+  );
+};
 
 const ContinentContainer = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
 `;
+
+const DetailsList = ({ list }) => {
+  const [items, setItems] = useState(list);
+
+  useEffect(() => setItems(list), [list]);
+
+  const moveElement = useCallback((dragIndex, hoverIndex) => {
+    setItems((prevItems) =>
+      update(prevItems, {
+        $splice: [
+          [dragIndex, 1],
+          [hoverIndex, 0, prevItems[dragIndex]],
+        ],
+      })
+    );
+  }, []);
+
+  const renderElement = (element, index) => {
+    return (
+      <DetailElement
+        element={element.tag}
+        index={index}
+        key={index}
+        id={element.id}
+        moveElement={moveElement}
+      />
+    );
+  };
+
+  return (
+    <ContinentContainer>
+      {items |> mapIndexed((item, index) => renderElement(item, index))}
+    </ContinentContainer>
+  );
+};
 
 const text =
   "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod\n" +
@@ -29,59 +109,34 @@ const ContinentDetails = withLoadingData((props) => {
   const continentDetails = props |> path(["data", "continent"]);
   const countries = continentDetails |> path(["countries"]);
 
-  const ref = useRef(null);
-
   const itemsList = [
-    { id: 1, tag: (<div style={{ border: "1px solid blue", margin: 2 }}><h3>{continentDetails.name}</h3></div>) },
-    { id: 2, tag: (<div style={{ border: "1px solid blue", margin: 2 }}><p>Code: {continentDetails.code}</p></div>) },
+    {
+      id: 1,
+      tag: <h3>{continentDetails.name}</h3>,
+    },
+    {
+      id: 2,
+      tag: <p>Code: {continentDetails.code}</p>,
+    },
     {
       id: 3,
       tag: (
-        <div style={{ border: "1px solid blue", margin: 2 }}>
-          <div style={{ fontSize: "10px" }}>
-            Countries:{" "}
-            <ul style={{ listStyle: "none" }}>
-              {countries
-                |> map((country) => (
+        <div style={{ fontSize: "10px" }}>
+          Countries:{" "}
+          <ul style={{ listStyle: "none" }}>
+            {countries
+              |> map((country) => (
                 <li key={prop("code", country)}>{prop("name", country)}</li>
               ))}
-            </ul>
-          </div>
-        </div>)
-    }];
-
-  const [items, setItems] = useState(itemsList);
-  console.log("items", items);
-
-  const [{ isDragging }, drag] = useDrag({
-    type: "element",
-    item: { id: "id" },
-    collect: (monitor) => ({
-      isDragging: monitor.isDragging(),
-    })
-  });
-
-  drag(ref);
-
-  console.log("ref", ref.current);
-
-  const message = (
-    <ContinentContainer>
-      <div>
-        {items
-          |> mapIndexed((item, index) => (
-          <div id={item.id} key={index} ref={ref}>
-            {item.tag}
-            {isDragging && console.log("is dragging:", item.id)}
-          </div>
-        ))}
-      </div>
-    </ContinentContainer>
-  );
+          </ul>
+        </div>
+      ),
+    },
+  ];
 
   return (
     <Section title="Continent Details" text={text}>
-      {message}
+      <DetailsList list={itemsList} />
     </Section>
   );
 }, CONTINENT_QUERY);

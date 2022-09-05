@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import styled from "styled-components";
 import update from "immutability-helper";
 import { prop } from "ramda";
@@ -24,6 +24,10 @@ const ListRoot = styled.div`
 
 const ContinentsList = ({ list }) => {
   const [cards, setCards] = useState(list);
+
+  useEffect(() => {
+    setCards(list);
+  }, [list]);
 
   const moveCard = useCallback((dragIndex, hoverIndex) => {
     setCards((prevCards) =>
