@@ -26,17 +26,15 @@ const DetailsList = ({ list }) => {
     );
   }, []);
 
-  const renderElement = (element, index) => {
-    return (
-      <DetailElement
-        element={element.tag}
-        index={index}
-        key={index}
-        id={element.id}
-        moveElement={moveElement}
-      />
-    );
-  };
+  const renderElement = (element, index) => (
+    <DetailElement
+      element={element.tag}
+      index={index}
+      key={index}
+      id={element.id}
+      moveElement={moveElement}
+    />
+  );
 
   return (
     <ContinentContainer>

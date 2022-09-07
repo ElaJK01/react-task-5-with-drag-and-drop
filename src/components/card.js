@@ -43,6 +43,7 @@ const CardContent = styled.div`
   margin-right: 10px;
   margin-left: 10px;
   background-color: whitesmoke;
+  color: ${({ theme }) => theme.cardText};
 
   @media screen and (min-width: 320px) and (max-width: 768px) {
     flex: 3;
