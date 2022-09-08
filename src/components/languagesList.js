@@ -1,9 +1,8 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { prop } from "ramda";
 import styled from "styled-components";
-import update from "immutability-helper";
 import Card from "./card";
-import { mapIndexed } from "../helpers";
+import { mapIndexed, moveElementFn } from "../helpers";
 
 const ListRoot = styled.div`
   display: flex;
@@ -25,16 +24,7 @@ const LanguagesList = ({ list }) => {
     setCards(list);
   }, [list]);
 
-  const moveCard = useCallback((dragIndex, hoverIndex) => {
-    setCards((prevCards) =>
-      update(prevCards, {
-        $splice: [
-          [dragIndex, 1],
-          [hoverIndex, 0, prevCards[dragIndex]],
-        ],
-      })
-    );
-  }, []);
+  const moveCard = useCallback(moveElementFn(setCards), []);
 
   const renderCard = useCallback(
     (card, index) => (

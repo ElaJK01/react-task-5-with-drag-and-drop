@@ -1,9 +1,8 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { map, prop } from "ramda";
+import { prop } from "ramda";
 import styled from "styled-components";
-import update from "immutability-helper";
 import Card from "./card";
-import { mapIndexed } from "../helpers";
+import { mapIndexed, moveElementFn } from "../helpers";
 
 const ListContainer = styled.div`
   display: flex;
@@ -25,21 +24,12 @@ const CountriesList = ({ list }) => {
     setCards(list);
   }, [list]);
 
-  const moveCard = useCallback((dragIndex, hoverIndex) => {
-    setCards((prevCards) =>
-      update(prevCards, {
-        $splice: [
-          [dragIndex, 1],
-          [hoverIndex, 0, prevCards[dragIndex]],
-        ],
-      })
-    );
-  }, []);
+  const moveCard = useCallback(moveElementFn(setCards), []);
 
   const renderCard = useCallback(
     (card, index) => (
       <Card
-        key={card.code}
+        key={index}
         index={index}
         id={card.code}
         moveCard={moveCard}
@@ -54,7 +44,9 @@ const CountriesList = ({ list }) => {
                 Languages:{" "}
                 <ul style={{ listStyleType: "none" }}>
                   {card.languages
-                    |> map((lang, i) => <li key={i}>{prop("name", lang)}</li>)}
+                    |> mapIndexed((lang, i) => (
+                      <li key={i}>{prop("name", lang)}</li>
+                    ))}
                 </ul>
               </li>
               <li>Emoji: {card.emoji}</li>
